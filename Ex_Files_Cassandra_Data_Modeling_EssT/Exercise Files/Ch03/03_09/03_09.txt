@@ -1,0 +1,116 @@
+-- Create a devcies table to demonstrate how to create unique IDs and delete rows and columns
+
+The tables uses installation year as a partition key,
+so that determines which node stores the data.
+
+It uses installation date and ID as a clustering key.
+
+CREATE TABLE devices (
+    id uuid,                         
+    device_name text,
+    ip_address  set<text>,
+    location map<text, text>,
+    installation_date date,
+    installation_year int,
+    manufacturer text,
+    PRIMARY KEY ((installation_year), installation_date, id));
+
+CREATE INDEX device_manufaturer_idx ON devices(manufacturer)
+In this case we want to create it on the devices table using the manufacturer column.
+
+
+Afterward we can issue a query like:
+Select * From devices Where manufacturer = 'Acme Server'.
+
+CREATE TABLE devices (
+    id uuid,                         
+    device_name text,
+    ip_address  set<text>,
+    location map<text, text>,
+    installation_date date,
+    installation_year int,
+    manufacturer text,
+    serial_number text,
+    PRIMARY KEY (id));
+
+
+-- Insert example rows using the UUID function to create unique IDs
+Insert into devices  
+   (id, device_name, ip_address, location, installation_date, installation_year, manufacturer, serial_number) 
+Values 
+  (uuid(), 'Server1', {'192.168.0.1'}, {'data center':'DC1', 'rack':'Rack1'}, '2015-01-20', 2015, 'Acme', 'SN12345');
+
+Insert into devices  
+   (id, device_name, ip_address, location, installation_date, installation_year, manufacturer, serial_number) 
+Values 
+  (uuid(), 'Server2', {'192.168.0.2','192.168.0.3'}, {'data center':'DC1', 'rack':'Rack1'}, '2016-02-10', 2016, 'Acme', 'SN32415746');
+
+Insert into devices  
+   (id, device_name, ip_address, location, installation_date, installation_year, manufacturer, serial_number) 
+Values 
+  (uuid(), 'Server3', {'192.168.0.4'}, {'data center':'DC2', 'rack':'Rack3'}, '2016-12-10', 2016, 'Acme', 'SN7891852');
+
+
+-- Delete a column from a row vs. deleting an entire row.
+
+—- Note, the following commands do not have UUIDs specified. They will 
+—- be different for each row inserted. To view UUIDs for each row, enter the 
+—- following command:
+
+select id, device_name from devices;
+
+
+cqlsh:perfmonitor> select id, device_name, location from devices;
+
+ id                                   | device_name   | location
+--------------------------------------+---------------+-----------------------------------------
+ 2bd7d4d1-f7b6-42cb-98a5-157fb8034672 |       Server2 | {'data center': 'DC2', 'rack': 'Rach2'}
+ 03b29dae-f351-4cf3-863f-d907392687bb | LoadBalancer1 | {'data center': 'DC2', 'rack': 'Rach3'}
+ 961109ed-0636-404f-ab2a-ebb8477b6ccf |       Server1 | {'data center': 'DC1', 'rack': 'Rach1'}
+
+
+
+delete device_name from devices where id =  <insert a UUID from one of the rows inserted above>
+
+cqlsh:perfmonitor> delete device_name from devices where id = 2bd7d4d1-f7b6-42cb-98a5-157fb8034672;
+
+cqlsh:perfmonitor> select id, device_name, location from devices;
+
+ id                                   | device_name   | location
+--------------------------------------+---------------+-----------------------------------------
+ 2bd7d4d1-f7b6-42cb-98a5-157fb8034672 |          null | {'data center': 'DC2', 'rack': 'Rach2'}
+ 03b29dae-f351-4cf3-863f-d907392687bb | LoadBalancer1 | {'data center': 'DC2', 'rack': 'Rach3'}
+ 961109ed-0636-404f-ab2a-ebb8477b6ccf |       Server1 | {'data center': 'DC1', 'rack': 'Rach1'}
+
+So Cassandra is no longer storing any of that information about that column in that row.
+
+Now, if we wanted to delete an entire row, we can enter the command: delete from devices;
+
+
+
+
+
+delete from devices where id = <insert a UUID from one of the rows inserted above>
+
+
+
+cqlsh:perfmonitor> delete from devices where id = 961109ed-0636-404f-ab2a-ebb8477b6ccf;
+
+cqlsh:perfmonitor> select id, device_name, location from devices;
+
+ id                                   | device_name   | location
+--------------------------------------+---------------+-----------------------------------------
+ 2bd7d4d1-f7b6-42cb-98a5-157fb8034672 |          null | {'data center': 'DC2', 'rack': 'Rach2'}
+ 03b29dae-f351-4cf3-863f-d907392687bb | LoadBalancer1 | {'data center': 'DC2', 'rack': 'Rach3'}
+
+
+
+
+
+
+
+
+
+
+
+

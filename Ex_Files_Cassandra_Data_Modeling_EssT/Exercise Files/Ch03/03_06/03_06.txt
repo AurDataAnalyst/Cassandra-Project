@@ -1,0 +1,50 @@
+Exercise - Create Time Series Table
+ 
+Use perfmonitor;
+ 
+create table server_cpu_utilization (
+               server_id varchar,
+               meaure_time timestamp,
+               cpu_utilization int,
+               primary key (server_id, measure_time));
+ 
+Describe server_cpu_utilization
+ 
+insert into server_cpu_utilization (server_id, measure_time, cpu_utilization) values ('appserver1','2017-05-20 07:01:00', 83) using ttl 86400;
+ 
+insert into server_cpu_utilization (server_id, measure_time, cpu_utilization) values ('appserver1','2017-05-20 07:02:00', 85) using ttl 86400;
+ 
+insert into server_cpu_utilization (server_id, measure_time, cpu_utilization) values ('appserver1','2017-05-20 07:03:00', 87) using ttl 86400;
+ 
+Select * from server_cpu_utilization;
+
+server_id  | measure_time                    | cpu_utilization
+------------+---------------------------------+-----------------
+ appserver1 | 2017-05-20 07:01:00.000000+0000 |              85
+ appserver1 | 2017-05-20 07:01:08.000000+0000 |              83
+ appserver1 | 2017-05-20 07:03:00.000000+0000 |              89
+
+ 
+Select cpu_utilization, TTL(cpu_utilization) from server_cpu_utilization;
+
+cqlsh:perfmonitor> select cpu_utilization, TTL(cpu_utilization) from server_cpu_utilization;
+
+ cpu_utilization | ttl(cpu_utilization)
+-----------------+----------------------
+              85 |                86406
+              83 |                86330
+              89 |                86431
+
+Select cpu_utilization, TTL(cpu_utilization) from server_cpu_utilization;  (TTL should be shorter)
+ 
+cqlsh:perfmonitor> select cpu_utilization, TTL(cpu_utilization) from server_cpu_utilization;
+
+ cpu_utilization | ttl(cpu_utilization)
+-----------------+----------------------
+              85 |                86327
+              83 |                86251
+              89 |                86352
+
+
+
+

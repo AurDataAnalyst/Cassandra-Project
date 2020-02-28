@@ -1,0 +1,80 @@
+
+
+If the node failed,the replica permit to retrieve this value or data.
+
+Sets a number of replicas when using a single data center for a cluster.
+
+List - a collection of one or more elements.
+
+Map - a group of key-value pairs
+
+
+Set - a collection of one or more elements
+with no duplicates.
+
+
+CREATE TABLE app_instance (
+	app_name text,
+	proc_id text,
+	host-id text,
+	os_priority int,
+	cpu_time int,
+	num_io_ops int,
+PRIMARY KEY (host_id, proc_id)
+)
+
+This is because the first attribute specified
+in the primary key list is used as the partition key,
+which determines which node the row is stored on.
+
+The rest of the primary key is used as the clustering key,
+
+The select is used with the prymary key to retrieve the data.
+
+That means Cassandra will map each host ID
+to a node in the cluster.
+It does this using a hash function.
+
+CREATE INDEX
+	appname_idx
+ON
+	app_instance(app_name)
+
+	SELECT *
+	FROM app_instance
+	WHERE app_name = 'WebStoreFront';
+
+Partition Key
+is used to distribute data accross ur nodes
+Partitioner:
+Hash Function->Node identifier
+
+
+Clustering Key
+is used to sort data within a partition
+
+Partition key -> Partitioner 
+(Hash function) ->Node n <-Data writen
+Replica of n -> Node n+1
+
+Tables in that key space will use that strategy
+and replication factor.
+
+SimpleStrategyNode:
+When the simple replication strategy is used,
+the replicas are placed on the next nodes in the ring.
+This works well with small clusters.
+
+The Network Typology Strategy:
+Large clusters, especially those that span
+multiple data centers,
+can use the network typology strategy
+to take into account the rack and the data center locations of various nodes.
+This way replicas can be placed on nodes
+in different racks(supports) and different data centers,
+thus improving the fault tolerance and availability
+of the cluster.
+
+sudo apt-get remove cassandra
+
+
